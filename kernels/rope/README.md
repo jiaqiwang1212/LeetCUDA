@@ -48,3 +48,26 @@ python3 rope.py
           out_f32_th: ['1.07467616  ', '-0.41201836 ', '-0.34494475 '], time:2.518094ms
 ----------------------------------------------------------------------------------------------------
 ```
+
+## Nsys 性能分析
+
+使用 `make` 编译并通过 Nsight Systems 进行性能分析：
+
+```bash
+# 编译所有变体（默认）
+make nsys
+nsys profile --stats=true ./rope_nsys.bin
+
+# 编译单个变体
+make nsys-f32x4-pack
+nsys profile --stats=true ./rope_nsys_f32x4_pack.bin
+```
+
+支持的编译目标：
+
+| Make 目标 | 编译宏 | 说明 |
+|-----------|--------|------|
+| `make nsys` | 全部 | 所有变体顺序执行 |
+| `make nsys-f32` | `-DROPE_F32` | FP32 基础版本 |
+| `make nsys-f32-v2` | `-DROPE_F32_V2` | FP32 v2 版本 |
+| `make nsys-f32x4-pack` | `-DROPE_F32X4_PACK` | FP32 float4 128-bit pack |

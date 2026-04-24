@@ -1,5 +1,43 @@
 # Reduce
 
+## Nsys 性能分析
+
+使用 `make` 编译并通过 Nsight Systems 进行性能分析：
+
+```bash
+# 编译所有变体（默认）
+make nsys
+nsys profile --stats=true ./block_all_reduce_nsys.bin
+
+# 编译单个变体
+make nsys-f16x8-pack-f32
+nsys profile --stats=true ./block_all_reduce_nsys_f16x8_pack_f32.bin
+```
+
+支持的编译目标：
+
+| Make 目标 | 编译宏 | 说明 |
+|-----------|--------|------|
+| `make nsys` | 全部 | 所有变体顺序执行 |
+| `make nsys-f32-f32` | `-DREDUCE_F32_F32` | FP32 标量，fp32 acc |
+| `make nsys-f32x4-f32` | `-DREDUCE_F32X4_F32` | FP32 float4，fp32 acc |
+| `make nsys-f16-f16` | `-DREDUCE_F16_F16` | FP16 标量，fp16 acc |
+| `make nsys-f16-f32` | `-DREDUCE_F16_F32` | FP16 标量，fp32 acc |
+| `make nsys-f16x2-f32` | `-DREDUCE_F16X2_F32` | FP16 half2，fp32 acc |
+| `make nsys-f16x2-f16` | `-DREDUCE_F16X2_F16` | FP16 half2，fp16 acc |
+| `make nsys-f16x8-pack-f16` | `-DREDUCE_F16X8_PACK_F16` | FP16 x8 pack，fp16 acc |
+| `make nsys-f16x8-pack-f32` | `-DREDUCE_F16X8_PACK_F32` | FP16 x8 pack，fp32 acc |
+| `make nsys-bf16-bf16` | `-DREDUCE_BF16_BF16` | BF16 标量，bf16 acc |
+| `make nsys-bf16-f32` | `-DREDUCE_BF16_F32` | BF16 标量，fp32 acc |
+| `make nsys-bf16x2-bf16` | `-DREDUCE_BF16X2_BF16` | BF16 x2，bf16 acc |
+| `make nsys-bf16x2-f32` | `-DREDUCE_BF16X2_F32` | BF16 x2，fp32 acc |
+| `make nsys-bf16x8-pack-bf16` | `-DREDUCE_BF16X8_PACK_BF16` | BF16 x8 pack，bf16 acc |
+| `make nsys-bf16x8-pack-f32` | `-DREDUCE_BF16X8_PACK_F32` | BF16 x8 pack，fp32 acc |
+| `make nsys-fp8-e4m3-f16` | `-DREDUCE_FP8_E4M3_F16` | FP8 E4M3，fp16 acc |
+| `make nsys-fp8-e5m2-f16` | `-DREDUCE_FP8_E5M2_F16` | FP8 E5M2，fp16 acc |
+| `make nsys-i8-i32` | `-DREDUCE_I8_I32` | Int8 标量，int32 acc |
+| `make nsys-i8x16-pack-i32` | `-DREDUCE_I8X16_PACK_I32` | Int8 x16 pack，int32 acc |
+
 ## 0x00 说明
 
 包含以下内容：

@@ -122,3 +122,28 @@ python3 dot_product.py
     out_f16f16_th: 7372.00000000  , time:0.02451396ms
 --------------------------------------------------------------------------------
 ```
+
+## Nsys 性能分析
+
+使用 `make` 编译并通过 Nsight Systems 进行性能分析：
+
+```bash
+# 编译所有变体（默认）
+make nsys
+nsys profile --stats=true ./dot_product_nsys.bin
+
+# 编译单个变体
+make nsys-f16x8-pack
+nsys profile --stats=true ./dot_product_nsys_f16x8_pack.bin
+```
+
+支持的编译目标：
+
+| Make 目标 | 编译宏 | 说明 |
+|-----------|--------|------|
+| `make nsys` | 全部 | 所有变体顺序执行 |
+| `make nsys-f32` | `-DDOT_PROD_F32` | FP32 标量，fp32 acc |
+| `make nsys-f32x4` | `-DDOT_PROD_F32X4` | FP32 float4 向量化 |
+| `make nsys-f16` | `-DDOT_PROD_F16` | FP16 标量，fp32 acc |
+| `make nsys-f16x2` | `-DDOT_PROD_F16X2` | FP16 half2，fp32 acc |
+| `make nsys-f16x8-pack` | `-DDOT_PROD_F16X8_PACK` | FP16 x8 128-bit pack |

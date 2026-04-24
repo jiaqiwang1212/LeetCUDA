@@ -15,3 +15,11 @@ mat_89:
 	nvcc mat_trans_swizzle.cu -o mat_trans_swizzle.89.bin $(DEFAULT_FLAGS_89)
 clean:
 	rm -rf *.bin
+
+# --- nsys profiling target (appended) ---
+SM_NSYS   ?= 80
+NSYS_CFLAGS=-O3 -std=c++17 -arch=sm_$(SM_NSYS) -I$(CUDA_HOME)/include
+NSYS_LDFLAGS=-lnvToolsExt
+nsys: swizzle_nsys.bin
+swizzle_nsys.bin: swizzle_nsys.cu
+	nvcc $(NSYS_CFLAGS) $< -o $@ $(NSYS_LDFLAGS)

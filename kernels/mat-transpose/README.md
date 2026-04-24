@@ -508,3 +508,37 @@ out_mat_transpose_cute_row_rvectorized_swizzled_optimized: [0.0, 8192.0, 1.0], v
 ----------------------------------------------------------------------------------------------------------------------------------
 
 ```
+
+## Nsys 性能分析
+
+使用 `make` 编译并通过 Nsight Systems 进行性能分析：
+
+```bash
+# 编译所有变体（默认）
+make nsys
+nsys profile --stats=true ./mat_transpose_nsys.bin
+
+# 编译单个变体
+make nsys-f32x4-shared-bcf-col2row2d
+nsys profile --stats=true ./mat_transpose_nsys_f32x4_shared_bcf_col2row2d.bin
+```
+
+支持的编译目标：
+
+| Make 目标 | 编译宏 | 说明 |
+|-----------|--------|------|
+| `make nsys` | 全部 | 所有变体顺序执行 |
+| `make nsys-f32-col2row` | `-DMAT_TRANS_F32_COL2ROW` | FP32 列到行（1D） |
+| `make nsys-f32-row2col` | `-DMAT_TRANS_F32_ROW2COL` | FP32 行到列（1D） |
+| `make nsys-f32x4-col2row` | `-DMAT_TRANS_F32X4_COL2ROW` | FP32 float4 列到行（1D） |
+| `make nsys-f32x4-row2col` | `-DMAT_TRANS_F32X4_ROW2COL` | FP32 float4 行到列（1D） |
+| `make nsys-f32-col2row2d` | `-DMAT_TRANS_F32_COL2ROW2D` | FP32 列到行（2D） |
+| `make nsys-f32-row2col2d` | `-DMAT_TRANS_F32_ROW2COL2D` | FP32 行到列（2D） |
+| `make nsys-f32-diagonal2d` | `-DMAT_TRANS_F32_DIAGONAL2D` | FP32 对角线分组（2D） |
+| `make nsys-f32x4-col2row2d` | `-DMAT_TRANS_F32X4_COL2ROW2D` | FP32 float4 列到行（2D） |
+| `make nsys-f32x4-row2col2d` | `-DMAT_TRANS_F32X4_ROW2COL2D` | FP32 float4 行到列（2D） |
+| `make nsys-f32x4-shared-col2row2d` | `-DMAT_TRANS_F32X4_SHARED_COL2ROW2D` | FP32 共享内存列到行 |
+| `make nsys-f32x4-shared-row2col2d` | `-DMAT_TRANS_F32X4_SHARED_ROW2COL2D` | FP32 共享内存行到列 |
+| `make nsys-f32x4-shared-bcf-col2row2d` | `-DMAT_TRANS_F32X4_SHARED_BCF_COL2ROW2D` | 共享内存 + BCF 列到行 |
+| `make nsys-f32x4-shared-bcf-row2col2d` | `-DMAT_TRANS_F32X4_SHARED_BCF_ROW2COL2D` | 共享内存 + BCF 行到列 |
+| `make nsys-f32x4-shared-bcf-merge-write-row2col2d` | `-DMAT_TRANS_F32X4_SHARED_BCF_MERGE_WRITE_ROW2COL2D` | 共享内存 + BCF + 合并写入 |

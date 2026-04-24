@@ -95,3 +95,31 @@ python3 layer_norm.py
        out_f16_th: ['-0.53662109 ', '2.359375    ', '0.78027344  '], time:1.99523735ms
 -------------------------------------------------------------------------------------
 ```
+
+## Nsys 性能分析
+
+使用 `make` 编译并通过 Nsight Systems 进行性能分析：
+
+```bash
+# 编译所有变体（默认）
+make nsys
+nsys profile --stats=true ./layer_norm_nsys.bin
+
+# 编译单个变体
+make nsys-f16x8-pack-f32
+nsys profile --stats=true ./layer_norm_nsys_f16x8_pack_f32.bin
+```
+
+支持的编译目标：
+
+| Make 目标 | 编译宏 | 说明 |
+|-----------|--------|------|
+| `make nsys` | 全部 | 所有变体顺序执行 |
+| `make nsys-f32` | `-DLAYERNORM_F32` | FP32 标量 |
+| `make nsys-f32x4` | `-DLAYERNORM_F32X4` | FP32 float4 向量化 |
+| `make nsys-f16-f16` | `-DLAYERNORM_F16_F16` | FP16 输入，FP16 acc |
+| `make nsys-f16x2-f16` | `-DLAYERNORM_F16X2_F16` | FP16 half2，FP16 acc |
+| `make nsys-f16x8-f16` | `-DLAYERNORM_F16X8_F16` | FP16 x8，FP16 acc |
+| `make nsys-f16-f32` | `-DLAYERNORM_F16_F32` | FP16 输入，FP32 acc |
+| `make nsys-f16x8-pack-f16` | `-DLAYERNORM_F16X8_PACK_F16` | FP16 x8 pack，FP16 acc |
+| `make nsys-f16x8-pack-f32` | `-DLAYERNORM_F16X8_PACK_F32` | FP16 x8 pack，FP32 acc |

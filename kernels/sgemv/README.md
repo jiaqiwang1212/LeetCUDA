@@ -29,3 +29,26 @@ out_k128f32x4: [-0.49123383, -13.83110905, -9.43372917], time:0.00376225ms
    out_f32_th: [-1.54411626, 9.39480972, 1.68226647], time:0.00812173ms
 --------------------------------------------------------------------------------
 ```
+
+## Nsys 性能分析
+
+使用 `make` 编译并通过 Nsight Systems 进行性能分析：
+
+```bash
+# 编译所有变体（默认）
+make nsys
+nsys profile --stats=true ./sgemv_nsys.bin
+
+# 编译单个变体
+make nsys-k128-f32x4
+nsys profile --stats=true ./sgemv_nsys_k128_f32x4.bin
+```
+
+支持的编译目标：
+
+| Make 目标 | 编译宏 | 说明 |
+|-----------|--------|------|
+| `make nsys` | 全部 | 所有变体顺序执行 |
+| `make nsys-k32` | `-DSGEMV_K32` | K=32 基础版本 |
+| `make nsys-k128-f32x4` | `-DSGEMV_K128_F32X4` | K=128 float4 向量化 |
+| `make nsys-k16` | `-DSGEMV_K16` | K=16 版本 |

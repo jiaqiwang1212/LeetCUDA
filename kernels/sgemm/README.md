@@ -649,4 +649,33 @@ out_tf32(mma2x4+...+stage2+swizzle): ['118.526184', '44.2716636'], time:93.91186
  out_tf32(...+stage2+dsmem+swizzle): ['118.526184', '44.2716636'], time:93.69635ms, swizzle: 2048, TFLOPS: 46.94 (+0.23%)
               out_tf32(cublas+tf32): ['118.526184', '44.2716636'], time:75.96850ms, swizzle: NOOP, TFLOPS: 57.89 (+23.34%)
 ----------------------------------------------------------------------------------------------------------------------------------
+
+## Nsys 性能分析
+
+使用 `make` 编译并通过 Nsight Systems 进行性能分析：
+
+```bash
+# 编译所有变体（默认）
+make nsys
+nsys profile --stats=true ./sgemm_nsys.bin
+
+# 编译单个变体
+make nsys-wmma-tf32-stage3
+nsys profile --stats=true ./sgemm_nsys_wmma_tf32_stage3.bin
+```
+
+支持的编译目标：
+
+| Make 目标 | 编译宏 | 说明 |
+|-----------|--------|------|
+| `make nsys` | 全部 | 所有变体顺序执行 |
+| `make nsys-naive-f32` | `-DSGEMM_NAIVE_F32` | FP32 朴素实现 |
+| `make nsys-sliced-k-f32` | `-DSGEMM_SLICED_K_F32` | FP32 分块 K |
+| `make nsys-t-8x8-f32x4` | `-DSGEMM_T_8X8_F32X4` | 8x8 tiling + float4 |
+| `make nsys-t-8x8-f32x4-bcf` | `-DSGEMM_T_8X8_F32X4_BCF` | 8x8 + BCF（offset=0） |
+| `make nsys-t-8x8-f32x4-bcf-offset` | `-DSGEMM_T_8X8_F32X4_BCF_OFFSET` | 8x8 + BCF（offset=4） |
+| `make nsys-t-8x8-f32x4-bcf-dbuf` | `-DSGEMM_T_8X8_F32X4_BCF_DBUF` | 8x8 + BCF + 双缓冲（offset=0） |
+| `make nsys-t-8x8-f32x4-bcf-dbuf-offset` | `-DSGEMM_T_8X8_F32X4_BCF_DBUF_OFFSET` | 8x8 + BCF + 双缓冲（offset=4） |
+| `make nsys-wmma-tf32-stage2` | `-DSGEMM_WMMA_TF32_STAGE2` | WMMA TF32 两阶段流水 |
+| `make nsys-wmma-tf32-stage3` | `-DSGEMM_WMMA_TF32_STAGE3` | WMMA TF32 三阶段流水 |
 ```

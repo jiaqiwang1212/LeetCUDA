@@ -121,3 +121,29 @@ python3 embedding.py
              out_f16_th: ['1.13085938  ', '1.19628906  ', '-0.61035156 '], time:0.030160ms
 --------------------------------------------------------------------------------------------------------------
 ```
+
+## Nsys 性能分析
+
+使用 `make` 编译并通过 Nsight Systems 进行性能分析：
+
+```bash
+# 编译所有变体（默认）
+make nsys
+nsys profile --stats=true ./embedding_nsys.bin
+
+# 编译单个变体
+make nsys-f16x8-pack
+nsys profile --stats=true ./embedding_nsys_f16x8_pack.bin
+```
+
+支持的编译目标：
+
+| Make 目标 | 编译宏 | 说明 |
+|-----------|--------|------|
+| `make nsys` | 全部 | 所有变体顺序执行 |
+| `make nsys-f32` | `-DEMBEDDING_F32` | FP32 标量 |
+| `make nsys-f32x4` | `-DEMBEDDING_F32X4` | FP32 float4 向量化 |
+| `make nsys-f32x4-pack` | `-DEMBEDDING_F32X4_PACK` | FP32 float4 128-bit pack |
+| `make nsys-f16` | `-DEMBEDDING_F16` | FP16 标量 |
+| `make nsys-f16x8` | `-DEMBEDDING_F16X8` | FP16 x8 向量化 |
+| `make nsys-f16x8-pack` | `-DEMBEDDING_F16X8_PACK` | FP16 x8 128-bit pack |

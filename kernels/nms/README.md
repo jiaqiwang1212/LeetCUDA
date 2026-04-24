@@ -41,3 +41,20 @@ python3 nms.py
     out_nms_th: ['8189 ', '8190 ', '8191 '], len of keep: 7023, time:3.39094877ms
 -------------------------------------------------------------------------------------
 ```
+
+## Nsys 性能分析
+
+使用 `make` 编译并通过 Nsight Systems 进行性能分析：
+
+```bash
+# 编译并分析
+make nsys
+nsys profile --stats=true ./nms_nsys.bin
+```
+
+支持的编译目标：
+
+| Make 目标 | 编译宏 | 说明 |
+|-----------|--------|------|
+| `make nsys` | 全部 | NMS 核函数 |
+| `make nsys-nms` | `-DNMS` | 显式指定 NMS 变体 |

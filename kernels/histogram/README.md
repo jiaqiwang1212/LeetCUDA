@@ -44,3 +44,25 @@ h_i32x4 8: 1000
 h_i32x4 9: 1000
 --------------------------------------------------------------------------------
 ```
+
+## Nsys 性能分析
+
+使用 `make` 编译并通过 Nsight Systems 进行性能分析：
+
+```bash
+# 编译所有变体（默认）
+make nsys
+nsys profile --stats=true ./histogram_nsys.bin
+
+# 编译单个变体
+make nsys-i32x4
+nsys profile --stats=true ./histogram_nsys_i32x4.bin
+```
+
+支持的编译目标：
+
+| Make 目标 | 编译宏 | 说明 |
+|-----------|--------|------|
+| `make nsys` | 全部 | 所有变体顺序执行 |
+| `make nsys-i32` | `-DHISTOGRAM_I32` | Int32 标量 |
+| `make nsys-i32x4` | `-DHISTOGRAM_I32X4` | Int32 int4 向量化 |

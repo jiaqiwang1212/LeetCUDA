@@ -134,3 +134,30 @@ python3 swish.py
 -------------------------------------------------------------------------------------
 
 ```
+
+## Nsys 性能分析
+
+使用 `make` 编译并通过 Nsight Systems 进行性能分析：
+
+```bash
+# 编译所有变体（默认）
+make nsys
+# 使用 nsys 对所有变体进行分析
+nsys profile --stats=true ./swish_nsys.bin
+
+# 编译单个变体（例如只分析 f16x8_pack）
+make nsys-f16x8-pack
+nsys profile --stats=true ./swish_nsys_f16x8_pack.bin
+```
+
+支持的编译目标：
+
+| Make 目标 | 编译宏 | 说明 |
+|-----------|--------|------|
+| `make nsys` | 全部 | 所有变体顺序执行 |
+| `make nsys-f32` | `-DSWISH_F32` | FP32 标量 |
+| `make nsys-f32x4` | `-DSWISH_F32X4` | FP32 float4 向量化 |
+| `make nsys-f16` | `-DSWISH_F16` | FP16 标量 |
+| `make nsys-f16x2` | `-DSWISH_F16X2` | FP16 half2 向量化 |
+| `make nsys-f16x8` | `-DSWISH_F16X8` | FP16 x8 unpack |
+| `make nsys-f16x8-pack` | `-DSWISH_F16X8_PACK` | FP16 x8 128-bit pack |

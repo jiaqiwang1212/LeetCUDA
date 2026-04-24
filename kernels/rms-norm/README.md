@@ -96,3 +96,32 @@ python3 rms_norm.py
        out_f16_th: ['-0.35229492 ', '-1.04003906 ', '0.17346191  '], time:1.35807014ms
 -------------------------------------------------------------------------------------
 ```
+
+## Nsys 性能分析
+
+使用 `make` 编译并通过 Nsight Systems 进行性能分析：
+
+```bash
+# 编译所有变体（默认）
+make nsys
+nsys profile --stats=true ./rms_norm_nsys.bin
+
+# 编译单个变体
+make nsys-f16x8-pack-f32
+nsys profile --stats=true ./rms_norm_nsys_f16x8_pack_f32.bin
+```
+
+支持的编译目标：
+
+| Make 目标 | 编译宏 | 说明 |
+|-----------|--------|------|
+| `make nsys` | 全部 | 所有变体顺序执行 |
+| `make nsys-f32` | `-DRMSNORM_F32` | FP32 标量 |
+| `make nsys-f32x4` | `-DRMSNORM_F32X4` | FP32 float4 向量化 |
+| `make nsys-f16-f16` | `-DRMSNORM_F16_F16` | FP16 输入，FP16 acc |
+| `make nsys-f16x2-f16` | `-DRMSNORM_F16X2_F16` | FP16 half2，FP16 acc |
+| `make nsys-f16x8-f16` | `-DRMSNORM_F16X8_F16` | FP16 x8，FP16 acc |
+| `make nsys-f16x8-f32` | `-DRMSNORM_F16X8_F32` | FP16 x8，FP32 acc |
+| `make nsys-f16-f32` | `-DRMSNORM_F16_F32` | FP16 标量，FP32 acc |
+| `make nsys-f16x8-pack-f16` | `-DRMSNORM_F16X8_PACK_F16` | FP16 x8 pack，FP16 acc |
+| `make nsys-f16x8-pack-f32` | `-DRMSNORM_F16X8_PACK_F32` | FP16 x8 pack，FP32 acc |

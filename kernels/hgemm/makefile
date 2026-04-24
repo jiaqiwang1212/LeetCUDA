@@ -90,3 +90,11 @@ wgmma_tn_90_fp32acc_debug:
 
 clean:
 	rm -rf *.bin & rm -rf ./bin
+
+# --- nsys profiling target (appended) ---
+SM_NSYS   ?= 80
+NSYS_CFLAGS=-O3 -std=c++17 -arch=sm_$(SM_NSYS) -I$(CUDA_HOME)/include
+NSYS_LDFLAGS=-lnvToolsExt
+nsys: hgemm_nsys.bin
+hgemm_nsys.bin: hgemm_nsys.cu
+	nvcc $(NSYS_CFLAGS) $< -o $@ $(NSYS_LDFLAGS)
