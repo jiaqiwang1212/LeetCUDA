@@ -4,10 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// Reinterpret a scalar address as a wider vector pointer for a single
+// 128-bit (float4) or 64-bit (half2) aligned load/store instruction.
 #define FLOAT4(value) (reinterpret_cast<float4 *>(&(value))[0])
 #define HALF2(value) (reinterpret_cast<half2 *>(&(value))[0])
 #define LDST128BITS(value) (reinterpret_cast<float4 *>(&(value))[0])
 
+// Warmup runs bring the GPU to steady-state clocks and warm the L2 cache
+// before the timed NVTX region begins.
 #define N_WARMUP 5
 #define N_ITER 20
 
@@ -53,6 +57,8 @@ __global__ void elementwise_add_f16x2_kernel(half *a, half *b, half *c, int N) {
 
 __global__ void elementwise_add_f16x8_kernel(half *a, half *b, half *c, int N) {
   int idx = 8 * (blockIdx.x * blockDim.x + threadIdx.x);
+  // Issue all 4 load pairs before the bounds checks so the compiler can
+  // overlap memory requests (memory-level parallelism); writes are guarded below.
   half2 reg_a_0 = HALF2(a[idx + 0]);
   half2 reg_a_1 = HALF2(a[idx + 2]);
   half2 reg_a_2 = HALF2(a[idx + 4]);
@@ -87,16 +93,20 @@ __global__ void elementwise_add_f16x8_kernel(half *a, half *b, half *c, int N) {
 __global__ void elementwise_add_f16x8_pack_kernel(half *a, half *b, half *c, int N) {
   int idx = 8 * (blockIdx.x * blockDim.x + threadIdx.x);
   half pack_a[8], pack_b[8], pack_c[8];
+  // Single 128-bit load (LDG.E.128) fetches all 8 halfs in one transaction,
+  // vs. the 4 separate 32-bit loads in elementwise_add_f16x8_kernel.
   LDST128BITS(pack_a[0]) = LDST128BITS(a[idx]);
   LDST128BITS(pack_b[0]) = LDST128BITS(b[idx]);
 
 #pragma unroll
   for (int i = 0; i < 8; i += 2) {
+    // __hadd2 fuses two fp16 additions into one SIMD instruction.
     HALF2(pack_c[i]) = __hadd2(HALF2(pack_a[i]), HALF2(pack_b[i]));
   }
   if ((idx + 7) < N) {
     LDST128BITS(c[idx]) = LDST128BITS(pack_c[0]);
   } else {
+    // Tail: scalar fallback avoids writing past the end of the output buffer.
     for (int i = 0; idx + i < N; i++) {
       c[idx + i] = __hadd(a[idx + i], b[idx + i]);
     }
@@ -178,6 +188,8 @@ int main() {
 #ifdef ELEMENTWISE_F32X4
   // ------------------------------------------------------------------
   // elementwise_add_f32x4_kernel: block=64, grid=(N+255)/256
+  // block is 1/4 of the scalar variant because each thread covers 4 elements;
+  // the grid stays the same so total element coverage is identical.
   {
     const int block = 64;
     const int grid = (N + 255) / 256;
