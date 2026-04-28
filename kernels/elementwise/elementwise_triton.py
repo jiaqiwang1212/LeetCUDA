@@ -246,19 +246,28 @@ def run_benchmark(
 ):
     if out is not None:
         out.fill_(0)
-    for _ in range(warmup):
-        perf_func(a, b, out)
+    if out is not None:
+        for _ in range(warmup):
+            perf_func(a, b, out)
+    else:
+        for _ in range(warmup):
+            perf_func(a, b)
     torch.cuda.synchronize()
     start = time.time()
-    for _ in range(iters):
-        perf_func(a, b, out)
+    if out is not None:
+        for _ in range(iters):
+            perf_func(a, b, out)
+    else:
+        for _ in range(iters):
+            perf_func(a, b)
     torch.cuda.synchronize()
     end = time.time()
     mean_time = (end - start) * 1000 / iters
-    out_val = out.flatten().detach().cpu().numpy().tolist()[:2]
+    result = out if out is not None else perf_func(a, b)
+    out_val = result.flatten().detach().cpu().numpy().tolist()[:2]
     out_val = [round(v, 8) for v in out_val]
     print(f"{'out_' + tag:>22}: {out_val}, time:{mean_time:.8f}ms")
-    return out, mean_time
+    return result, mean_time
 
 
 # ---------------------------------------------------------------------------
