@@ -566,12 +566,12 @@ __global__ void block_all_reduce_sum_i8x16_pack_i32_kernel(int8_t *a,
 // ---------------------------------------------------------------------------
 // Helper macro for warmup + timed NVTX range
 // ---------------------------------------------------------------------------
-#define RUN_KERNEL(label, launch_expr)                      \
+#define RUN_KERNEL(label, ...)                              \
   do {                                                      \
-    for (int i = 0; i < N_WARMUP; i++) { launch_expr; }    \
+    for (int i = 0; i < N_WARMUP; i++) { __VA_ARGS__; }    \
     cudaDeviceSynchronize();                                \
     nvtxRangePush(label);                                   \
-    for (int i = 0; i < N_ITER; i++) { launch_expr; }      \
+    for (int i = 0; i < N_ITER; i++) { __VA_ARGS__; }      \
     cudaDeviceSynchronize();                                \
     nvtxRangePop();                                         \
   } while (0)
